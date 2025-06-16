@@ -1,10 +1,10 @@
 FROM ubuntu:latest
 
-# Update and install Apache & Git
+# Update package list and install Apache & Git
 RUN apt-get update -y && apt-get install -y apache2 git
 
-# Clone the repository inside the container
-RUN git clone https://github.com/patthechosen/Jenkins.git /var/www/html
+# Remove existing files in /var/www/html before cloning
+RUN rm -rf /var/www/html/* && git clone https://github.com/patthechosen/Jenkins.git /var/www/html
 
 # Expose port 80
 EXPOSE 80
