@@ -1,13 +1,23 @@
-FROM ubuntu:latest
+# Use official Ubuntu base image
+FROM ubuntu:20.04
 
-# Update package list and install Apache & Git
-RUN apt-get update -y && apt-get install -y apache2 git
+# Avoid interactive prompts during install
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Remove existing files in /var/www/html before cloning
-RUN rm -rf /var/www/html/* && git clone https://github.com/patthechosen/Jenkins.git /var/www/html
+# Update packages and install necessary tools
+RUN apt-get update && \
+    apt-get install -y apache2 git curl && \
+    apt-get clean
 
-# Expose port 80
+# Add ServerName to avoid Apache startup warning
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+# Add startup script to dynamically clone repo and start Apache
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Expose port 80 for web access
 EXPOSE 80
 
-# Start Apache when the container runs
-CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+# Run Apache in foreground and dynamically pull latest content
+CMD ["/start.sh"]
