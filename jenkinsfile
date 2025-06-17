@@ -3,46 +3,45 @@ pipeline {
 
     environment {
         GITHUB_REPO = "https://github.com/patthechosen/Jenkins.git"
-        DOCKERHUB_REPO = "patthechosen/pat_jenkins_pipeline"
+        DOCKERHUB_REPO = "patthechosen/pat_jenkins_apache"
         DOCKERHUB_CREDS = credentials('DockerhubCreds-id')
     }
 
     stages {
-        stage('Source') {
+        stage('Checkout Source') {
             steps {
-                echo 'Checking out GitHub repository'
+                echo "Cloning repository..."
                 git branch: 'main', credentialsId: 'GithubCredsok', url: "${GITHUB_REPO}"
                 sh 'ls -l'
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                echo "Building the Docker image using the Dockerfile from GitHub"
-                sh "docker build -t ${DOCKERHUB_REPO}:v${BUILD_NUMBER} -f Dockerfile ."
-                sh "docker images"
+                echo "Building Docker image with Apache and custom index.html"
+                sh "docker build -t ${DOCKERHUB_REPO}:v${BUILD_NUMBER} ."
             }
         }
 
-        stage('Docker login') {
+        stage('Login to Docker Hub') {
             steps {
                 echo "Logging into Docker Hub"
-                sh "docker login -u ${env.DOCKERHUB_CREDS_USR} -p ${env.DOCKERHUB_CREDS_PSW}"
+                sh "echo ${DOCKERHUB_CREDS_PSW} | docker login -u ${DOCKERHUB_CREDS_USR} --password-stdin"
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Push to Docker Hub') {
             steps {
-                echo "Pushing Docker image v${BUILD_NUMBER} to Docker Hub"
+                echo "Pushing image to Docker Hub"
                 sh "docker push ${DOCKERHUB_REPO}:v${BUILD_NUMBER}"
             }
         }
 
-        stage('Run Apache Container') {
+        stage('Run Container') {
             steps {
-                echo "Running Apache container with GitHub index.html"
-                sh "docker run -d --name apache_container -p 80:80 ${DOCKERHUB_REPO}:v${BUILD_NUMBER}"
-                sh "docker ps | grep apache_container"
+                echo "Launching container with Apache and your GitHub index.html"
+                sh "docker run -d -p 80:80 --name pat_apache ${DOCKERHUB_REPO}:v${BUILD_NUMBER}"
+                sh "docker ps -f name=pat_apache"
             }
         }
     }
