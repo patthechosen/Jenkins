@@ -15,6 +15,8 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 # Add startup script to dynamically clone repo and start Apache
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
+# Copy custom index.html into Apache's web root
+COPY index.html /var/www/html/index.html
 
 # Expose port 80 for web access
 EXPOSE 8080
