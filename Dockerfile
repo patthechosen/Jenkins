@@ -20,4 +20,4 @@ RUN chmod +x /start.sh
 EXPOSE 80
 
 # Run Apache in foreground and dynamically pull latest content
-CMD ["/start.sh"]
+CMD ["apachectl", "-D", "FOREGROUND"]
