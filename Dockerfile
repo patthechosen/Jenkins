@@ -17,7 +17,7 @@ COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 # Expose port 80 for web access
-EXPOSE 80
+EXPOSE 8080
 
 # Run Apache in foreground and dynamically pull latest content
 CMD ["apachectl", "-D", "FOREGROUND"]
