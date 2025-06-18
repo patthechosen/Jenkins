@@ -45,5 +45,19 @@ pipeline {
                 sh "docker ps -f name=pat_apache"
             }
         }
+
+        stage('Verify Apache') {
+            steps {
+                echo "Verifying that Apache is responding with the custom index.html"
+                script {
+                    def response = sh(returnStatus: true, script: 'curl -s -o /dev/null -w "%{http_code}" http://localhost')
+                    if (response == 200) {
+                        echo "✅ Apache is up and serving your content"
+                    } else {
+                        error "❌ Apache did not respond as expected (HTTP ${response})"
+                    }
+                }
+            }
+        }
     }
 }
