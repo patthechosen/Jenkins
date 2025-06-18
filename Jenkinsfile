@@ -48,13 +48,16 @@ pipeline {
 
         stage('Verify Apache') {
             steps {
-                echo "Verifying that Apache is responding with the custom index.html"
+                echo "Checking Apache from inside container"
                 script {
-                    def response = sh(returnStatus: true, script: 'curl -s -o /dev/null -w "%{http_code}" http://localhost')
-                    if (response == 200) {
-                        echo "✅ Apache is up and serving your content"
+                    def status = sh(
+                        returnStatus: true, 
+                        script: 'docker exec pat_apache curl -s -o /dev/null -w "%{http_code}" http://localhost'
+                    )
+                    if (status == 200) {
+                        echo "✅ Apache inside container is working"
                     } else {
-                        error "❌ Apache did not respond as expected (HTTP ${response})"
+                        error "❌ Apache inside container is not responding (HTTP ${status})"
                     }
                 }
             }
